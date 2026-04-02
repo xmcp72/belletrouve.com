@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Belle Trouvé — Fashion Discovered</title>
+  <meta name="description" content="Belle Trouvé is a curated AI-powered fashion accessory discovery app for iOS. Coming soon." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Tenor+Sans&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --navy: #0c1220; --gold: #c9a84c; --gold-light: #e2c97e; --cream: #f5f0e8; --cream-dim: rgba(245,240,232,0.55); --cream-faint: rgba(245,240,232,0.12); }
+    html, body { height: 100%; background: var(--navy); color: var(--cream); font-family: 'Tenor Sans', sans-serif; overflow-x: hidden; }
+    body::after { content: ''; position: fixed; top: -20%; left: 50%; transform: translateX(-50%); width: 800px; height: 600px; background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    .wrapper { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+    .top-rule { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; width: min(480px, 90vw); }
+    .top-rule::before, .top-rule::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .top-rule span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 11px; letter-spacing: 0.2em; color: var(--gold); opacity: 0.7; white-space: nowrap; }
+    .wordmark { margin-bottom: 12px; animation: fadeUp 1.2s ease both; }
+    .wordmark h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(52px, 10vw, 96px); letter-spacing: 0.12em; line-height: 1; color: var(--cream); }
+    .wordmark h1 em { font-style: italic; color: var(--gold-light); }
+    .tagline { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 56px; animation: fadeUp 1.2s 0.15s ease both; }
+    .ornament { display: flex; align-items: center; gap: 12px; margin-bottom: 56px; animation: fadeUp 1.2s 0.25s ease both; }
+    .ornament::before, .ornament::after { content: ''; width: 80px; height: 1px; }
+    .ornament::before { background: linear-gradient(90deg, transparent, var(--gold-light)); }
+    .ornament::after { background: linear-gradient(90deg, var(--gold-light), transparent); }
+    .ornament-diamond { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
+    .description { max-width: 480px; font-family: 'Cormorant Garamond', serif; font-size: clamp(18px, 2.5vw, 22px); font-weight: 300; line-height: 1.75; color: var(--cream-dim); margin-bottom: 64px; animation: fadeUp 1.2s 0.35s ease both; }
+    .description em { font-style: italic; color: var(--cream); }
+    .badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(201,168,76,0.35); padding: 12px 28px; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 80px; animation: fadeUp 1.2s 0.45s ease both; }
+    .badge-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; animation: pulse 2s ease infinite; }
+    .contact { font-size: 12px; letter-spacing: 0.15em; color: var(--cream-faint); animation: fadeUp 1.2s 0.55s ease both; }
+    .contact a { color: var(--cream-dim); text-decoration: none; border-bottom: 1px solid rgba(245,240,232,0.2); transition: color 0.3s, border-color 0.3s; }
+    .contact a:hover { color: var(--gold-light); border-color: var(--gold-light); }
+    .bottom-nav { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; animation: fadeUp 1.2s 0.65s ease both; }
+    .bottom-nav a { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,240,232,0.3); text-decoration: none; transition: color 0.3s; }
+    .bottom-nav a:hover { color: var(--gold); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="top-rule"><span>Est. 2026</span></div>
+    <div class="wordmark"><h1>Belle <em>Trouvé</em></h1></div>
+    <p class="tagline">Fashion Discovered</p>
+    <div class="ornament"><div class="ornament-diamond"></div></div>
+    <p class="description">An <em>AI-powered</em> fashion accessory discovery app for iOS.<br />Curating what's trending across Pinterest, Instagram, and TikTok<br />into one beautifully considered shopping experience.</p>
+    <div class="badge"><div class="badge-dot"></div>Coming Soon to the App Store</div>
+    <p class="contact">Enquiries &nbsp;·&nbsp; <a href="mailto:chporter72@belletrouve.com">chporter72@belletrouve.com</a></p>
+    <nav class="bottom-nav"><a href="/privacy">Privacy Policy</a><a href="mailto:chporter72@belletrouve.com">Contact</a></nav>
+  </div>
+</body>
+</html>
