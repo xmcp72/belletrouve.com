@@ -99,7 +99,7 @@ async function runFetchJob(apiKey: string) {
     for (const post of rawPosts) {
       const imageURL = post.display_url || post.thumbnail_url || "";
       if (!imageURL) continue;
-      const gemini = await extractProductData(imageURL, post.caption || "");
+      const gemini = await extractProductData(imageURL, post.caption || "", "instagram");
       if (!gemini.isFashionRelated) continue;
       feedItems.push(normalizeInstagramPost(post, gemini));
     }
@@ -136,9 +136,9 @@ async function runFetchJob(apiKey: string) {
 
     const feedItems: FeedItem[] = [];
     for (const post of rawPosts) {
-      const imageURL = post.video?.cover || "";
+      const imageURL = (post.video?.cover as any)?.url_list?.[0] || post.video?.cover || "";
       if (!imageURL) continue;
-      const gemini = await extractProductData(imageURL, post.desc || "");
+      const gemini = await extractProductData(imageURL, post.desc || "", "tiktok");
       if (!gemini.isFashionRelated) continue;
       feedItems.push(normalizeTikTokPost(post, gemini));
     }

@@ -4,7 +4,7 @@
 import axios from "axios";
 import {RawTikTokPost} from "../types";
 
-const BASE_URL = "https://api.scrapecreators.com/v1";
+const BASE_URL = "https://api.scrapecreators.com";
 
 export async function fetchTikTokHashtagPosts(
   apiKey: string,
@@ -12,13 +12,13 @@ export async function fetchTikTokHashtagPosts(
   limit = 20
 ): Promise<RawTikTokPost[]> {
   try {
-    const response = await axios.get(`${BASE_URL}/tiktok/hashtag/posts`, {
+    const response = await axios.get(`${BASE_URL}/v1/tiktok/search/hashtag`, {
       headers: {"x-api-key": apiKey},
       params: {hashtag, limit},
       timeout: 30000,
     });
 
-    const posts: RawTikTokPost[] = response.data?.posts || response.data?.data || [];
+    const posts: RawTikTokPost[] = response.data?.aweme_list || response.data?.posts || response.data?.data || [];
     return posts.slice(0, limit);
   } catch (err) {
     console.error(`TikTok hashtag fetch error (${hashtag}):`, err);
@@ -32,13 +32,13 @@ export async function fetchTikTokUserPosts(
   limit = 12
 ): Promise<RawTikTokPost[]> {
   try {
-    const response = await axios.get(`${BASE_URL}/tiktok/user/posts`, {
+    const response = await axios.get(`${BASE_URL}/v3/tiktok/profile/videos`, {
       headers: {"x-api-key": apiKey},
-      params: {username, limit},
+      params: {handle: username, limit},
       timeout: 30000,
     });
 
-    const posts: RawTikTokPost[] = response.data?.posts || response.data?.data || [];
+    const posts: RawTikTokPost[] = response.data?.aweme_list || response.data?.posts || response.data?.data || [];
     return posts.slice(0, limit);
   } catch (err) {
     console.error(`TikTok user fetch error (${username}):`, err);
@@ -51,13 +51,13 @@ export async function fetchTikTokTrendingPosts(
   limit = 20
 ): Promise<RawTikTokPost[]> {
   try {
-    const response = await axios.get(`${BASE_URL}/tiktok/trending`, {
+    const response = await axios.get(`${BASE_URL}/v1/tiktok/get-trending-feed`, {
       headers: {"x-api-key": apiKey},
       params: {limit},
       timeout: 30000,
     });
 
-    const posts: RawTikTokPost[] = response.data?.posts || response.data?.data || [];
+    const posts: RawTikTokPost[] = response.data?.aweme_list || response.data?.posts || response.data?.data || [];
     return posts.slice(0, limit);
   } catch (err) {
     console.error("TikTok trending fetch error:", err);

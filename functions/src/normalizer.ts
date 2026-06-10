@@ -51,15 +51,19 @@ export function normalizeTikTokPost(
   post: RawTikTokPost,
   gemini: GeminiExtractionResult
 ): FeedItem {
-  const imageURL = post.video?.cover || "";
-  const sourceURL = post.author ?
-    `https://www.tiktok.com/@${post.author.uniqueId}/video/${post.id}` :
-    `https://www.tiktok.com/video/${post.id}`;
-  const engagementScore =
-    (post.stats?.diggCount || 0) + (post.stats?.playCount || 0) / 100;
+  const raw = post as any;
+  const awemeId = raw.aweme_id || raw.id || "unknown";
+  const imageURL = raw.video?.cover?.url_list?.[0] || raw.video?.cover || "";
+  const uniqueId = raw.author?.unique_id || raw.author?.uniqueId || "";
+  const sourceURL = uniqueId ?
+    `https://www.tiktok.com/@${uniqueId}/video/${awemeId}` :
+    `https://www.tiktok.com/video/${awemeId}`;
+  const digg = raw.statistics?.digg_count || raw.stats?.diggCount || 0;
+  const plays = raw.statistics?.play_count || raw.stats?.playCount || 0;
+  const engagementScore = digg + plays / 100;
 
   return {
-    id: `tiktok_${post.id}`,
+    id: `tiktok_${awemeId}`,
     title: gemini.title,
     brand: gemini.brand,
     price: gemini.price,
@@ -69,7 +73,7 @@ export function normalizeTikTokPost(
     category: gemini.category,
     subcategory: gemini.subcategory,
     sourceURL,
-    sourcePlatformId: post.id,
+    sourcePlatformId: awemeId,
     fetchedAt: admin.firestore.Timestamp.now(),
     expiresAt: expiryTimestamp(),
     isActive: true,
