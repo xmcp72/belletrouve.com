@@ -10,7 +10,7 @@ import {
   GeminiExtractionResult,
 } from "./types";
 
-const EXPIRY_HOURS = 48;
+const EXPIRY_HOURS = 168; // 7 days — pipeline runs every 48hrs, this gives plenty of buffer
 
 function expiryTimestamp(): admin.firestore.Timestamp {
   const d = new Date();

@@ -9,22 +9,30 @@ const db = () => admin.firestore();
 export async function writeFeedItems(items: FeedItem[]): Promise<number> {
   if (items.length === 0) return 0;
 
-  const batch = db().batch();
-  let count = 0;
+  let batch = db().batch();
+  let batchCount = 0;
+  let totalCount = 0;
 
   for (const item of items) {
     const ref = db().collection("feed_items").doc(item.id);
     batch.set(ref, item, {merge: false});
-    count++;
+    batchCount++;
+    totalCount++;
 
-    // Firestore batch limit is 500 — commit and start new batch if needed
-    if (count % 499 === 0) {
+    // Firestore batch limit is 500 — commit and start a fresh batch
+    if (batchCount === 499) {
       await batch.commit();
+      batch = db().batch(); // new batch instance — cannot reuse after commit
+      batchCount = 0;
     }
   }
 
-  await batch.commit();
-  return count;
+  // Commit any remaining items
+  if (batchCount > 0) {
+    await batch.commit();
+  }
+
+  return totalCount;
 }
 
 export async function writeFetchMetadata(
