@@ -67,3 +67,15 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Backend lives in the private belletrouve-backend repo (git backend ...)
+.backend-git/
+functions/
+firebase.json
+.firebaserc
+firestore.rules
+firestore.indexes.json
+storage.rules
+
+# Private project files — never publish on the website
+Session Reports/
