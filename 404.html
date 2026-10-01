@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Belle Trouvé</title>
+  <meta name="robots" content="noindex">
+  <!--
+    GitHub Pages serves this file for any path that isn't a real file
+    (e.g. /product/abc123). Hand the path to the app shell, which restores it
+    with history.replaceState before the router runs (see index.html <head>).
+  -->
+  <script>
+    try { sessionStorage.setItem('bt-redirect', location.pathname + location.search + location.hash); } catch (e) {}
+    location.replace('/');
+  </script>
+  <style>html,body{background:#0A1128;margin:0;height:100%}</style>
+</head>
+<body></body>
+</html>

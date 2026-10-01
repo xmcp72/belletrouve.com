@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["R7MQ3RQL2R.com.christian.chicvivo"],
+        "components": [
+          { "/": "/product/*", "comment": "Shared product links open in the Belle Trouvé app when it is installed" }
+        ]
+      }
+    ]
+  }
+}

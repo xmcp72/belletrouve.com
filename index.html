@@ -1,56 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
- <meta name='impact-site-verification' value='549f4159-6ac1-48fb-a3f9-6ab1b53b515c'>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="impact-site-verification" value="549f4159-6ac1-48fb-a3f9-6ab1b53b515c">
   <title>Belle Trouvé — Fashion Discovered</title>
-  <meta name="description" content="Belle Trouvé is a curated AI-powered fashion accessory discovery app for iOS. Coming soon." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Tenor+Sans&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --navy: #0c1220; --gold: #c9a84c; --gold-light: #e2c97e; --cream: #f5f0e8; --cream-dim: rgba(245,240,232,0.55); --cream-faint: rgba(245,240,232,0.12); }
-    html, body { height: 100%; background: var(--navy); color: var(--cream); font-family: 'Tenor Sans', sans-serif; overflow-x: hidden; }
-    body::after { content: ''; position: fixed; top: -20%; left: 50%; transform: translateX(-50%); width: 800px; height: 600px; background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
-    .wrapper { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
-    .top-rule { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; width: min(480px, 90vw); }
-    .top-rule::before, .top-rule::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-    .top-rule span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 11px; letter-spacing: 0.2em; color: var(--gold); opacity: 0.7; white-space: nowrap; }
-    .wordmark { margin-bottom: 12px; animation: fadeUp 1.2s ease both; }
-    .wordmark h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(52px, 10vw, 96px); letter-spacing: 0.12em; line-height: 1; color: var(--cream); }
-    .wordmark h1 em { font-style: italic; color: var(--gold-light); }
-    .tagline { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 56px; animation: fadeUp 1.2s 0.15s ease both; }
-    .ornament { display: flex; align-items: center; gap: 12px; margin-bottom: 56px; animation: fadeUp 1.2s 0.25s ease both; }
-    .ornament::before, .ornament::after { content: ''; width: 80px; height: 1px; }
-    .ornament::before { background: linear-gradient(90deg, transparent, var(--gold-light)); }
-    .ornament::after { background: linear-gradient(90deg, var(--gold-light), transparent); }
-    .ornament-diamond { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
-    .description { max-width: 480px; font-family: 'Cormorant Garamond', serif; font-size: clamp(18px, 2.5vw, 22px); font-weight: 300; line-height: 1.75; color: var(--cream-dim); margin-bottom: 64px; animation: fadeUp 1.2s 0.35s ease both; }
-    .description em { font-style: italic; color: var(--cream); }
-    .badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(201,168,76,0.35); padding: 12px 28px; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 80px; animation: fadeUp 1.2s 0.45s ease both; }
-    .badge-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; animation: pulse 2s ease infinite; }
-    .contact { font-size: 12px; letter-spacing: 0.15em; color: var(--cream-dim); animation: fadeUp 1.2s 0.55s ease both; }
-    .contact a { color: var(--cream); text-decoration: none; border-bottom: 1px solid rgba(245,240,232,0.4); transition: color 0.3s, border-color 0.3s; }
-    .contact a:hover { color: var(--gold-light); border-color: var(--gold-light); }
-    .bottom-nav { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; animation: fadeUp 1.2s 0.65s ease both; }
-    .bottom-nav a { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,240,232,0.3); text-decoration: none; transition: color 0.3s; }
-    .bottom-nav a:hover { color: var(--gold); }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
-  </style>
+  <meta name="description" content="Belle Trouvé curates trending fashion from Instagram, TikTok and Pinterest — apparel, shoes, handbags, jewelry, accessories and beauty.">
+  <meta name="theme-color" content="#0A1128">
+
+  <!-- 1) Restore the real path when GitHub Pages bounced us through 404.html
+       2) Upgrade any old #/ links from the first preview build
+       3) Apply saved theme before first paint (no light/dark flash) -->
+  <script>
+    try {
+      var r = sessionStorage.getItem('bt-redirect');
+      if (r) { sessionStorage.removeItem('bt-redirect'); history.replaceState(null, '', r); }
+    } catch (e) {}
+    if (location.hash.indexOf('#/') === 0) history.replaceState(null, '', location.hash.slice(1) || '/');
+    try {
+      var t = localStorage.getItem('bt-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <div class="wrapper">
-    <div class="top-rule"><span>Est. 2026</span></div>
-    <div class="wordmark"><h1>Belle <em>Trouvé</em></h1></div>
-    <p class="tagline">Fashion Discovered</p>
-    <div class="ornament"><div class="ornament-diamond"></div></div>
-    <p class="description">An <em>AI-powered</em> fashion accessory discovery app for iOS.<br />Curating what's trending across Pinterest, Instagram, and TikTok<br />into one beautifully considered shopping experience.</p>
-    <div class="badge"><div class="badge-dot"></div>Coming Soon to the App Store</div>
-    <p class="contact">Enquiries &nbsp;·&nbsp; <a href="mailto:chporter72@belletrouve.com">chporter72@belletrouve.com</a></p>
-    <nav class="bottom-nav"><a href="/privacy">Privacy Policy</a><a href="mailto:chporter72@belletrouve.com">Contact</a></nav>
+  <a class="skip-link" href="#view">Skip to content</a>
+
+  <div class="app">
+    <!-- Desktop (≥1280px): persistent left sidebar -->
+    <aside class="sidebar" aria-label="Primary">
+      <a class="wordmark" href="/">Belle <span>Trouvé</span></a>
+      <nav class="sidenav" data-nav="side"></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-bottom">
+        <div class="sidebar-divider"></div>
+        <button class="sidelink" type="button" data-action="toggle-theme">
+          <span data-icon="moon"></span><span>Appearance</span>
+        </button>
+        <button class="sidelink" type="button" data-action="open-menu">
+          <span data-icon="menu"></span><span>Menu</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <!-- Tablet (768–1279px): top pill nav + menu button -->
+      <header class="topnav-row">
+        <nav class="topnav" data-nav="top" aria-label="Primary"></nav>
+        <button class="menu-btn" type="button" data-action="open-menu" aria-label="Open menu">
+          <span data-icon="menu"></span>
+        </button>
+      </header>
+
+      <main id="view" class="content" tabindex="-1"></main>
+    </div>
+
+    <!-- Phone (<768px): floating bottom tab bar -->
+    <nav class="tabbar" data-nav="tab" aria-label="Primary"></nav>
+
+    <button class="to-top" type="button" aria-label="Back to top" data-action="to-top">
+      <span data-icon="chevronUp"></span>
+    </button>
   </div>
+
+  <!-- Hamburger menu (sheet on phone, dialog on tablet/desktop) -->
+  <div class="sheet-backdrop" data-action="close-menu" hidden></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="menuTitle" hidden>
+    <div class="sheet-grabber"></div>
+    <div class="sheet-head">
+      <span class="sheet-head-spacer"></span>
+      <h2 id="menuTitle">Menu</h2>
+      <button class="done-btn" type="button" data-action="close-menu">Done</button>
+    </div>
+    <div class="sheet-body">
+      <p class="menu-section">Appearance</p>
+      <div class="menu-row">
+        <span class="menu-icon" data-icon="moon"></span>
+        <span class="menu-label">Dark Mode</span>
+        <button class="switch" type="button" role="switch" aria-checked="true" aria-label="Dark Mode" data-action="toggle-theme"><span></span></button>
+      </div>
+
+      <div class="menu-divider"></div>
+      <p class="menu-section">Get the App</p>
+      <a class="menu-row" data-appstore-link href="#" target="_blank" rel="noopener">
+        <span class="menu-icon" data-icon="apple"></span>
+        <span class="menu-label">Belle Trouvé for iPhone &amp; iPad</span>
+        <span class="menu-chevron" data-icon="chevronRight"></span>
+      </a>
+
+      <div class="menu-divider"></div>
+      <p class="menu-section">Support</p>
+      <a class="menu-row" href="mailto:chporter72@belletrouve.com?subject=Belle%20Trouv%C3%A9%20Support">
+        <span class="menu-icon" data-icon="mail"></span>
+        <span class="menu-label">Contact Support</span>
+        <span class="menu-chevron" data-icon="chevronRight"></span>
+      </a>
+
+      <div class="menu-divider"></div>
+      <p class="menu-section">Legal</p>
+      <a class="menu-row" href="/privacy/">
+        <span class="menu-icon" data-icon="hand"></span>
+        <span class="menu-label">Privacy Statement</span>
+        <span class="menu-chevron" data-icon="chevronRight"></span>
+      </a>
+      <a class="menu-row" href="/affiliate-disclosure" data-action="close-menu">
+        <span class="menu-icon" data-icon="tag"></span>
+        <span class="menu-label">Affiliate Disclosure</span>
+        <span class="menu-chevron" data-icon="chevronRight"></span>
+      </a>
+
+      <div class="menu-divider"></div>
+      <p class="menu-version">Belle Trouvé for Web · Preview</p>
+    </div>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
 </body>
 </html>
