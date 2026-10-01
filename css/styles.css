@@ -364,6 +364,15 @@ a.platform-badge:hover { transform: scale(1.1); }
 .menu-label { flex: 1; }
 .menu-chevron { width: 16px; height: 16px; color: var(--text-dim); }
 .menu-divider { height: 1px; background: var(--line); margin-top: 10px; }
+
+/* Official "Download on the App Store" badge (Apple artwork, shown unmodified).
+   Black badge on the dark theme, white badge on the light theme. Both files are
+   119.66 x 40, so height 48px keeps the proportions. */
+.appstore-badge { display: inline-block; margin: 6px 0 4px; border-radius: 9px; line-height: 0; }
+.appstore-badge img { height: 48px; width: auto; }
+.appstore-badge .badge-on-light { display: none; }
+:root[data-theme="light"] .appstore-badge .badge-on-light { display: block; }
+:root[data-theme="light"] .appstore-badge .badge-on-dark { display: none; }
 .menu-version { text-align: center; color: var(--text-dim); font-size: 13px; margin: 20px 0 4px; opacity: .8; }
 
 .switch {
