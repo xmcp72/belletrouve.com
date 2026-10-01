@@ -21,6 +21,13 @@
       var t = localStorage.getItem('bt-theme');
       if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
     } catch (e) {}
+    // iPhone Safari proper (not Chrome/Firefox/Edge/Opera/Google app on iOS) gets a class for Safari-only layout tweaks
+    try {
+      var ua = navigator.userAgent;
+      if (/iPhone|iPod/.test(ua) && /Version\/[\d.]+.*Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|GSA/.test(ua)) {
+        document.documentElement.classList.add('ios-safari');
+      }
+    } catch (e) {}
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">

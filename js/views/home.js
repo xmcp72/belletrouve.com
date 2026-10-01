@@ -2,6 +2,7 @@
 
 import { fetchHomeFeed, fetchPlatformFeed, PLATFORMS } from '../feed.js';
 import { productCard, skeletonCards, wireImages, pageHead, PLATFORM_LABELS } from '../components.js';
+import { debugLog } from '../debug.js';
 
 // Remembered across navigation within the visit (so Back from a product keeps the pill)
 let selectedPlatform = null; // null = all platforms
@@ -47,6 +48,7 @@ async function loadFeed(view, { force = false } = {}) {
       ? await fetchPlatformFeed(selectedPlatform, { force })
       : await fetchHomeFeed({ force });
     if (token !== renderToken || !grid.isConnected) return; // a newer load superseded this one
+    debugLog(`feed loaded: ${items.length} items; first image: ${(items[0]?.imageURL || 'none').slice(0, 90)}`);
 
     if (!items.length) {
       grid.outerHTML = `

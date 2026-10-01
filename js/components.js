@@ -1,5 +1,7 @@
 // Belle Trouvé — shared UI building blocks
 
+import { debugLog } from './debug.js';
+
 export const PLATFORM_LABELS = { instagram: 'Instagram', tiktok: 'TikTok', pinterest: 'Pinterest', curated: 'Curated' };
 
 // Same artwork as the iOS asset catalog (InstagramIcon / TikTokIcon / PinterestIcon)
@@ -54,13 +56,18 @@ export function skeletonCards(n = 10) {
 
 /** Fade images in once loaded; drop cards whose image fails (expired/blocked URL). */
 export function wireImages(root) {
-  root.querySelectorAll('.thumb > img:not([data-wired])').forEach((img) => {
+  const pending = root.querySelectorAll('.thumb > img:not([data-wired])');
+  if (pending.length) debugLog(`wiring ${pending.length} card images`);
+  pending.forEach((img) => {
     img.dataset.wired = '1';
     const done = () => img.classList.add('loaded');
     if (img.complete && img.naturalWidth) done();
     else {
       img.addEventListener('load', done, { once: true });
-      img.addEventListener('error', () => img.closest('.card')?.remove(), { once: true });
+      img.addEventListener('error', () => {
+        debugLog(`image failed: ${(img.currentSrc || img.src).slice(0, 120)}`);
+        img.closest('.card')?.remove();
+      }, { once: true });
     }
   });
 }

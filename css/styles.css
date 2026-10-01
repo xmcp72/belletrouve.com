@@ -180,6 +180,10 @@ svg { display: block; }
   padding-bottom: 2px;
 }
 .filters::-webkit-scrollbar { display: none; }
+/* Centered on phones. Auto margins on the ends (instead of justify-content: center)
+   keep the first pill reachable if the row ever overflows and has to scroll. */
+.filters > :first-child { margin-left: auto; }
+.filters > :last-child { margin-right: auto; }
 .pill {
   flex: 0 0 auto;
   border: 1px solid var(--line-strong);
@@ -374,6 +378,14 @@ a.platform-badge:hover { transform: scale(1.1); }
 :root[data-theme="light"] .appstore-badge .badge-on-light { display: block; }
 :root[data-theme="light"] .appstore-badge .badge-on-dark { display: none; }
 .menu-version { text-align: center; color: var(--text-dim); font-size: 13px; margin: 20px 0 4px; opacity: .8; }
+
+/* iPhone Safari only (class set in index.html): its floating toolbar leaves extra space above
+   the page's bottom edge, so the tab bar needs a smaller offset there. Firefox and Chrome on iOS
+   keep the default 16px, which already sits right for them. */
+@media (max-width: 767px) {
+  .ios-safari .tabbar { bottom: calc(4px + env(safe-area-inset-bottom)); }
+  .ios-safari .to-top { bottom: calc(84px + env(safe-area-inset-bottom)); }
+}
 
 .switch {
   position: relative;
