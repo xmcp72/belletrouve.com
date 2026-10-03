@@ -4,7 +4,7 @@
 // path back to index.html (see both files) — so shared product links work, and the
 // paths are ready for iOS Universal Links when the Share button ships in the app.
 
-import { hydrateIcons } from './icons.js';
+import { hydrateIcons, icons } from './icons.js';
 import { APP_STORE_URL } from './config.js';
 import { renderHome } from './views/home.js';
 import { renderProduct } from './views/product.js';
@@ -155,6 +155,14 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0A1128' : '#F5EDD6';
   document.querySelectorAll('.switch').forEach((s) => s.setAttribute('aria-checked', String(theme === 'dark')));
+  // Moon + "Dark Mode" in dark, sun + "Light Mode" in light (matches the iOS menu)
+  document.querySelectorAll('[data-theme-icon]').forEach((el) => {
+    el.innerHTML = theme === 'dark' ? icons.moon : icons.sun;
+    el.dataset.hydrated = '1';
+  });
+  document.querySelectorAll('[data-theme-label]').forEach((el) => {
+    el.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+  });
   try { localStorage.setItem('bt-theme', theme); } catch (e) { /* private mode */ }
 }
 function toggleTheme() {
