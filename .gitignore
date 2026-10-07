@@ -79,3 +79,8 @@ storage.rules
 
 # Private project files — never publish on the website
 Session Reports/
+
+# Private working files, never publish
+.agents/
+skills-lock.json
+Assets/
