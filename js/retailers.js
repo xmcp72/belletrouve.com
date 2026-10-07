@@ -1,6 +1,6 @@
 // Belle Trouvé — "Shop Similar" retailer links
 // Direct port of RetailerLinksService.swift so web and iOS behave identically.
-//   • Prefers the Gemini-optimized search URLs stored on the card at ingestion.
+//   • Prefers the search URLs already stored on the card.
 //   • Falls back to the local query heuristic for older cards.
 //   • eBay first, then Amazon (Session 42 ordering). Both carry affiliate tags.
 
@@ -24,7 +24,7 @@ export function isShoppable(title = '') {
   return !words.some((w) => nonProductWords.has(w));
 }
 
-/** Shop Similar is shown only when the title is shoppable AND Gemini wasn't low-confidence. */
+/** Shop Similar is shown only when the title is shoppable AND the product isn't flagged as a weak match. */
 export function shouldShowShopSimilar(product) {
   return isShoppable(product.title) && product.productConfidence !== 'low';
 }
@@ -83,8 +83,8 @@ export function retailerLinks(product) {
 }
 
 // ── Smart Alternatives (Session 56) ────────────────────────────────────────
-// Port of AlternativeCard.retailerURL in SmartAlternativesView.swift: a search at the retailer
-// Gemini named, using Gemini's search query. Order matters (Nordstrom Rack before Nordstrom,
+// Port of AlternativeCard.retailerURL in SmartAlternativesView.swift: a search at the suggested
+// retailer, using the suggested search query. Order matters (Nordstrom Rack before Nordstrom,
 // Banana Republic before Gap). eBay is added for the web with the EPN affiliate link.
 // Anything unrecognized falls back to Google Shopping, as on iOS.
 const ALTERNATIVE_RETAILERS = [

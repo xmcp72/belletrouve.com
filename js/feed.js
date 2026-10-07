@@ -41,7 +41,7 @@ export function toProduct(doc) {
     amazonSearchURL: d.amazonSearchURL || '',
     isActive: d.isActive !== false,
     engagementScore: Number(d.engagementScore) || 0,
-    // Session 54: when the pipeline first saw this item (ms). 0 for items written before the field existed.
+    // Session 54: when this item was first added (ms). 0 for items written before the field existed.
     firstSeenAt: typeof d.firstSeenAt?.toMillis === 'function' ? d.firstSeenAt.toMillis() : 0,
   };
 }
