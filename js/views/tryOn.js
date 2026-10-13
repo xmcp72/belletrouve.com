@@ -4,7 +4,9 @@
 // tray of saved items to pick from. Arriving from a product page's "Try It On"
 // (/studio/try-on?item=<id>) preselects that item, like iOS's initialProduct.
 //
-// Web additions: a Save Image link under a finished result, and a Browse link when there
+// Web additions: a Save Image link under a finished result, a Share button over the result
+// (shown where the browser can share image files, e.g. phones and tablets; it opens the system
+// share sheet, as on iOS, and the image never leaves the device), and a Browse link when there
 // are no saves yet. On phones the tray scrolls sideways (as on iOS); on tablet and desktop
 // it wraps into rows, which is easier with a mouse.
 
@@ -18,6 +20,21 @@ import {
 } from '../tryOn.js';
 
 const TOUCH = window.matchMedia('(hover: none)').matches;
+
+// Can this browser share image files through the system share sheet?
+const CAN_SHARE_FILES = (() => {
+  try {
+    return typeof navigator.canShare === 'function' && typeof File === 'function'
+      && navigator.canShare({ files: [new File([''], 'try-on.jpg', { type: 'image/jpeg' })] });
+  } catch (err) { return false; }
+})();
+
+// Turn the result (a data: URL) into a File for the share sheet.
+async function resultFile(dataURL) {
+  const blob = await (await fetch(dataURL)).blob();
+  const ext = blob.type === 'image/png' ? 'png' : 'jpg';
+  return new File([blob], `belle-trouve-try-on.${ext}`, { type: blob.type || 'image/jpeg' });
+}
 
 let cleanups = [];
 function cleanup() { cleanups.forEach((off) => off()); cleanups = []; }
@@ -45,7 +62,12 @@ export function renderTryOn(view, { goBack }) {
       <span class="page-head-spacer"></span>
     </div>
     <div class="tryon">
-      <button class="tryon-photo" type="button" data-pick></button>
+      <div class="tryon-stage">
+        <button class="tryon-photo" type="button" data-pick></button>
+        <button class="tryon-share" type="button" aria-label="Share or save try-on image" hidden>
+          <span data-icon="share"></span>
+        </button>
+      </div>
       <a class="tryon-save" download="belle-trouve-try-on.jpg" hidden>Save Image</a>
       <p class="tryon-error" role="alert" hidden></p>
       <button class="tryon-generate" type="button" disabled>Generate Try-On</button>
@@ -58,6 +80,8 @@ export function renderTryOn(view, { goBack }) {
 
   const photoBox = view.querySelector('.tryon-photo');
   const saveLink = view.querySelector('.tryon-save');
+  const shareBtn = view.querySelector('.tryon-share');
+  hydrateIcons(shareBtn);
   const errorLine = view.querySelector('.tryon-error');
   const genBtn = view.querySelector('.tryon-generate');
   const trayLabel = view.querySelector('.tryon-tray-label');
@@ -92,6 +116,7 @@ export function renderTryOn(view, { goBack }) {
     photoBox.setAttribute('aria-label', photoURL ? 'Choose a different photo' : 'Select a photo');
     hydrateIcons(photoBox);
 
+    shareBtn.hidden = !CAN_SHARE_FILES || !resultURL || generating;
     saveLink.hidden = !resultURL || generating;
     if (resultURL) saveLink.href = resultURL; else saveLink.removeAttribute('href');
 
@@ -145,6 +170,13 @@ export function renderTryOn(view, { goBack }) {
     if (file) choosePhoto(file);
   });
   genBtn.addEventListener('click', () => generate());
+  shareBtn.addEventListener('click', async () => {
+    const { resultURL } = getTryOnState();
+    if (!resultURL) return;
+    try {
+      await navigator.share({ files: [await resultFile(resultURL)], title: 'My Belle Trouvé try-on' });
+    } catch (err) { /* user cancelled, or sharing failed: the Save Image link below still works */ }
+  });
   tray.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-item]');
     if (!btn) return;
