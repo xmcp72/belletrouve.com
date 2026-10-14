@@ -4,6 +4,10 @@
 // smartAlternatives Cloud Function with the anonymous user's ID token as a Bearer header.
 // The function returns { itemIdentified, alternatives: [{ name, brand, priceRange, retailer, searchQuery }] }.
 //
+// Choose from Favorites (Session 72): a saved item's photo can't be read by the browser (its
+// image host sends no CORS headers, so a canvas would be blocked), so a favorite is sent as
+// { imageURL } and the function downloads the photo itself, as Virtual Try-On does.
+//
 // The photo and result live in memory only while you're on the screen: renderAlternatives
 // calls resetAlternatives when the screen opens, so leaving and coming back starts fresh,
 // as on iOS (Session 56). Nothing is stored.
@@ -15,11 +19,14 @@ const FUNCTION_URL = 'https://us-central1-chic-vivo.cloudfunctions.net/smartAlte
 const MAX_EDGE = 1024;       // same as iOS
 const JPEG_QUALITY = 0.7;    // same as iOS
 
+const DEFAULT_ERROR = 'Gemini couldn’t find alternatives for this photo. Please try again, or choose a different photo.';
+
 // ── State ─────────────────────────────────────────────────
 // status: 'idle' | 'loading' | 'done' | 'error'
 let state = { status: 'idle', photoURL: '', result: null, errorMessage: '' };
-let lastFile = null;
+let lastSource = null;       // { file } or { product } — what "Try Again" runs again
 let runId = 0;               // ignores a stale answer if a new photo was picked meanwhile
+let photoIsBlob = false;     // a chosen photo is a blob: URL to release; a favorite's is a plain https URL
 
 const listeners = new Set();
 function set(patch) {
@@ -31,14 +38,15 @@ export function getAlternativesState() { return state; }
 export function onAlternativesChange(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 
 function releasePhoto() {
-  if (state.photoURL) URL.revokeObjectURL(state.photoURL);
+  if (state.photoURL && photoIsBlob) URL.revokeObjectURL(state.photoURL);
+  photoIsBlob = false;
 }
 
 /** Clears the photo and results (called when the screen opens). An in-flight search is discarded. */
 export function resetAlternatives() {
   runId++;
   releasePhoto();
-  lastFile = null;
+  lastSource = null;
   state = { status: 'idle', photoURL: '', result: null, errorMessage: '' };
 }
 
@@ -86,63 +94,93 @@ function cleanResult(data) {
 }
 
 // ── Analyze ───────────────────────────────────────────────
+/** Signs in (once), POSTs the body, and returns the cleaned result. */
+async function requestAlternatives(body) {
+  await startFavorites();                  // signs in anonymously (once)
+  const { auth } = await getAuthKit();
+  if (!auth.currentUser) throw new Error('No signed-in user');
+  const idToken = await auth.currentUser.getIdToken();
+
+  let res;
+  try {
+    res = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify(body),
+    });
+  } catch (networkErr) {
+    const err = new Error('network');
+    err.cause = networkErr;
+    throw err;
+  }
+
+  let data = null;
+  try { data = await res.json(); } catch (e) { /* non-JSON error page */ }
+  if (res.status === 422) throw new Error('favorite-photo');   // the function couldn't download the item's photo
+  if (!res.ok) throw new Error(data?.error || `Server error (${res.status})`);
+  return cleanResult(data);
+}
+
+function failureMessage(err) {
+  if (err.message === 'decode') return 'This photo couldn’t be opened. Please try a JPEG or PNG.';
+  if (err.message === 'favorite-photo') return 'Could not load that item’s photo. Please try another.';
+  if (err.message === 'network') return 'Couldn’t reach Gemini. Please check your connection and try again.';
+  return DEFAULT_ERROR;
+}
+
 /** Shows the photo straight away, then asks Gemini for alternatives (starts on its own, as on iOS). */
 export async function analyzePhoto(file) {
   if (!file) return;
   const id = ++runId;
-  lastFile = file;
+  lastSource = { file };
   releasePhoto();
   const photoURL = URL.createObjectURL(file);
+  photoIsBlob = true;
   set({ status: 'loading', photoURL, result: null, errorMessage: '' });
 
   try {
     const img = await decodeImage(photoURL);
     const imageBase64 = toJpegBase64(img);
-
-    await startFavorites();                  // signs in anonymously (once)
-    const { auth } = await getAuthKit();
-    if (!auth.currentUser) throw new Error('No signed-in user');
-    const idToken = await auth.currentUser.getIdToken();
-
-    let res;
-    try {
-      res = await fetch(FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ imageBase64 }),
-      });
-    } catch (networkErr) {
-      const err = new Error('network');
-      err.cause = networkErr;
-      throw err;
-    }
-
-    let data = null;
-    try { data = await res.json(); } catch (e) { /* non-JSON error page */ }
-    if (!res.ok) throw new Error(data?.error || `Server error (${res.status})`);
-    const result = cleanResult(data);
+    const result = await requestAlternatives({ imageBase64 });
 
     if (id !== runId) return;
     set({ status: 'done', result });
   } catch (err) {
     if (id !== runId) return;
     console.error('[alternatives] failed', err);
-    let errorMessage = 'Gemini couldn’t find alternatives for this photo. Please try again, or choose a different photo.';
     if (err.message === 'decode') {
-      errorMessage = 'This photo couldn’t be opened. Please try a JPEG or PNG.';
       releasePhoto();
+      lastSource = null;
       set({ photoURL: '' });
-      lastFile = null;
-    } else if (err.message === 'network') {
-      errorMessage = 'Couldn’t reach Gemini. Please check your connection and try again.';
     }
-    set({ status: 'error', errorMessage });
+    set({ status: 'error', errorMessage: failureMessage(err) });
   }
 }
 
-/** Runs the last photo again (after an error). */
-export function retry() {
-  if (lastFile) analyzePhoto(lastFile);
+/** Searches for alternatives to one of the user's favorites (the function downloads its photo). */
+export async function analyzeFavorite(product) {
+  if (!product?.imageURL) return;
+  const id = ++runId;
+  lastSource = { product };
+  releasePhoto();
+  set({ status: 'loading', photoURL: product.imageURL, result: null, errorMessage: '' });
+
+  try {
+    const result = await requestAlternatives({ imageURL: product.imageURL });
+
+    if (id !== runId) return;
+    set({ status: 'done', result });
+  } catch (err) {
+    if (id !== runId) return;
+    console.error('[alternatives] failed', err);
+    set({ status: 'error', errorMessage: failureMessage(err) });
+  }
 }
 
-export function hasRetry() { return !!lastFile; }
+/** Runs the last photo or favorite again (after an error). */
+export function retry() {
+  if (lastSource?.file) analyzePhoto(lastSource.file);
+  else if (lastSource?.product) analyzeFavorite(lastSource.product);
+}
+
+export function hasRetry() { return !!lastSource; }

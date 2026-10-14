@@ -1,19 +1,26 @@
 // Belle Trouvé — Smart Alternatives screen (web)
 // Mirrors SmartAlternativesView.swift and the Session 47 mockup:
-//   idle     → photo-search icon, "Find Budget-Friendly Alternatives", Choose a Photo
+//   idle     → photo-search icon, "Find Budget-Friendly Alternatives", Choose a Photo,
+//              Choose from Favorites (Session 72)
 //   loading  → the chosen photo, "Choose Different Photo", spinner
 //   done     → Identified Item, then one card per alternative, each opening a search at
 //              that retailer in a new tab
 //   error    → a short message, plus Try Again when there's a photo to retry
 // Web difference: "Choose Different Photo" opens the picker straight away (iOS clears the
 // screen first), so cancelling the picker keeps the current results.
+// Choose from Favorites opens a bottom sheet (centered dialog on tablet and desktop) with the
+// saved items as a photo grid; tapping one searches for alternatives to it, like Android and iOS.
 
 import { esc } from '../components.js';
 import { hydrateIcons } from '../icons.js';
 import { alternativeSearchURL } from '../retailers.js';
+import { startFavorites, getFavorites, favoritesReady, onFavoritesChange } from '../favorites.js';
 import {
-  getAlternativesState, onAlternativesChange, analyzePhoto, retry, hasRetry, resetAlternatives,
+  getAlternativesState, onAlternativesChange, analyzePhoto, analyzeFavorite, retry, hasRetry,
+  resetAlternatives,
 } from '../alternatives.js';
+
+const HEART_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>`;
 
 const IDLE = `
   <div class="alt-idle">
@@ -22,6 +29,9 @@ const IDLE = `
     <p>Pick a photo of any fashion item and Gemini will find similar styles for less.</p>
     <button class="alt-choose" type="button" data-choose>
       <span data-icon="studioAlternatives"></span> Choose a Photo
+    </button>
+    <button class="alt-choose-fav" type="button" data-choose-fav>
+      ${HEART_ICON} Choose from Favorites
     </button>
     <p class="alt-gemini">Uses Google Gemini</p>
   </div>`;
@@ -82,6 +92,77 @@ function errorSection(message) {
     </div>`;
 }
 
+// ── Favorites picker ──────────────────────────────────────
+// Built on <dialog> like the collection sheet, so focus stays inside it, Esc closes it, and the
+// page behind is inert. Reuses the .bt-sheet look; only the photo grid is new (.alt-fav-grid).
+function openFavoritesPicker(onPick) {
+  document.querySelector('dialog.bt-sheet')?.close();   // only one at a time
+
+  const dlg = document.createElement('dialog');
+  dlg.className = 'bt-sheet';
+  dlg.setAttribute('aria-labelledby', 'altFavTitle');
+  document.body.appendChild(dlg);
+
+  const paint = () => {
+    // The same item can't appear twice (Android drops duplicates too)
+    const seen = new Set();
+    const items = getFavorites().filter((p) => p.imageURL && !seen.has(p.id) && seen.add(p.id));
+
+    let body;
+    if (!favoritesReady() && !items.length) {
+      body = `<div class="alt-fav-grid" aria-hidden="true">
+        ${Array.from({ length: 6 }, () => '<span class="alt-fav-thumb skeleton"></span>').join('')}
+      </div>`;
+    } else if (!items.length) {
+      body = '<p class="bt-sheet-hint alt-fav-empty">You haven’t saved anything yet. Tap the heart on any item to save it here.</p>';
+    } else {
+      body = `<div class="alt-fav-grid" role="group" aria-label="Your saved items">
+        ${items.map((p) => `
+          <button class="alt-fav-thumb" type="button" data-fav="${esc(p.id)}"
+            aria-label="${esc(p.title)}${p.brand ? ` by ${esc(p.brand)}` : ''}" title="${esc(p.title)}">
+            <img src="${esc(p.imageURL)}" alt="" loading="lazy" decoding="async">
+          </button>`).join('')}
+      </div>`;
+    }
+
+    dlg.innerHTML = `
+      <div class="bt-sheet-grabber" aria-hidden="true"></div>
+      <h2 class="bt-sheet-title" id="altFavTitle" tabindex="-1">Choose from Favorites</h2>
+      ${body}
+      <button class="bt-sheet-done" type="button" data-done>Cancel</button>`;
+    dlg.querySelectorAll('.alt-fav-thumb img').forEach((img) => {
+      img.addEventListener('error', () => img.closest('.alt-fav-thumb')?.classList.add('img-failed'), { once: true });
+    });
+  };
+
+  const off = onFavoritesChange(paint);
+  startFavorites().catch((err) => console.warn('[alternatives] favorites unavailable', err));
+
+  dlg.addEventListener('click', (e) => {
+    if (e.target === dlg) {
+      // Taps on the sheet's own padding also target the dialog — only close for taps outside it
+      const r = dlg.getBoundingClientRect();
+      const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+      if (outside) dlg.close();
+      return;
+    }
+    if (e.target.closest('[data-done]')) { dlg.close(); return; }
+
+    const thumb = e.target.closest('[data-fav]');
+    if (thumb) {
+      const product = getFavorites().find((p) => p.id === thumb.dataset.fav);
+      dlg.close();
+      if (product) onPick(product);
+    }
+  });
+
+  dlg.addEventListener('close', () => { off(); dlg.remove(); }, { once: true });
+
+  paint();
+  dlg.showModal();
+  dlg.querySelector('.bt-sheet-title').focus();   // Tab then reaches the photos
+}
+
 let unsubscribe = null;
 
 export function renderAlternatives(view, { goBack }) {
@@ -115,7 +196,12 @@ export function renderAlternatives(view, { goBack }) {
 
   body.addEventListener('click', (e) => {
     if (e.target.closest('[data-choose]')) fileInput.click();
-    else if (e.target.closest('[data-retry]')) retry();
+    else if (e.target.closest('[data-choose-fav]')) {
+      openFavoritesPicker((product) => {
+        analyzeFavorite(product);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    } else if (e.target.closest('[data-retry]')) retry();
   });
 
   const paint = () => {
